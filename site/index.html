@@ -71,7 +71,7 @@
     .section { margin-top: 48px; }
     .section h2 { font-size: 1.5rem; text-align: center; margin-bottom: 6px; letter-spacing: -0.01em; }
     .section .sub { text-align: center; color: var(--muted); font-size: 0.95rem; margin-bottom: 28px; }
-    .projects { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 18px; }
     .project {
       display: block; text-decoration: none; color: var(--text);
       background: var(--card); border: 1px solid var(--border); border-radius: 18px;
@@ -135,6 +135,14 @@
           <p>Un faux site de rencontre pour joueurs Minecraft, avec profils à swiper et système de match.</p>
           <div class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
           <span class="go">Lancer la démo →</span>
+        </a>
+        <a class="project" href="/bourse/">
+          <span class="emoji">📈</span>
+          <h3>Investo</h3>
+          <div class="kind">Simulateur · fintech</div>
+          <p>Un simulateur d'investissement en bourse : ~200 actions, cours simulés en direct, achat/vente et portefeuille.</p>
+          <div class="tags"><span>JavaScript</span><span>Canvas</span><span>localStorage</span></div>
+          <span class="go">Ouvrir le simulateur →</span>
         </a>
       </div>
     </section>

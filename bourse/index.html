@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investo — Simulateur d'investissement en bourse</title>
+  <meta name="description" content="Investo : apprends à investir en bourse avec un simulateur. Argent virtuel, zéro risque. Tableau de bord, marché, portefeuille et cours en temps réel simulés." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2316c784'/%3E%3Cpath d='M20 66 L42 44 L56 58 L80 30' stroke='white' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <meta property="og:title" content="Investo — Simulateur d'investissement en bourse" />
+  <meta property="og:description" content="Apprends à investir avec de l'argent virtuel. Zéro risque." />
+  <meta property="og:type" content="website" />
+  <style>
+    :root{
+      --bg:#0b0e14; --bg2:#0f131c; --panel:#151b27; --panel2:#1b2230;
+      --line:#252d3d; --text:#e7eaf0; --muted:#8b93a7;
+      --green:#16c784; --red:#ea3943; --accent:#5b6cff; --gold:#f0b90b;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    .up{color:var(--green)} .down{color:var(--red)}
+    .mono{font-variant-numeric:tabular-nums}
+
+    /* ===== Nav ===== */
+    .nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;
+      padding:12px 22px;background:rgba(11,14,20,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.15rem;margin-right:14px}
+    .brand .mk{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),#0fa);display:flex;align-items:center;justify-content:center;color:#04130c;font-weight:900}
+    .navlinks{display:flex;gap:4px;flex:1 1 auto}
+    .navlinks button{background:none;border:none;color:var(--muted);font-size:.95rem;font-weight:600;
+      padding:8px 14px;border-radius:9px;cursor:pointer;font-family:inherit}
+    .navlinks button:hover{color:var(--text);background:var(--panel)}
+    .navlinks button.on{color:#fff;background:var(--panel2)}
+    .balance{display:flex;flex-direction:column;align-items:flex-end;padding:5px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+    .balance .lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .balance .val{font-weight:800;font-size:1.05rem}
+
+    .disclaimer{background:rgba(240,185,11,.1);border-bottom:1px solid rgba(240,185,11,.25);color:#f0d68a;
+      font-size:.82rem;text-align:center;padding:7px 16px}
+    .disclaimer b{color:var(--gold)}
+
+    main{max-width:1080px;margin:0 auto;padding:26px 22px 60px}
+    .view{display:none} .view.active{display:block;animation:fade .35s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    h2.vt{font-size:1.5rem;margin-bottom:4px}
+    .vsub{color:var(--muted);font-size:.92rem;margin-bottom:20px}
+
+    /* ===== Cards ===== */
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+    .stat .k{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+    .stat .v{font-size:1.5rem;font-weight:800}
+    .stat .d{font-size:.85rem;font-weight:600;margin-top:3px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+    .panel h3{font-size:1.05rem;margin-bottom:14px}
+    .chart-wrap{height:240px} canvas{display:block;width:100%;height:100%}
+
+    /* ===== Tables ===== */
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;
+      padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700}
+    th.r,td.r{text-align:right}
+    td{padding:11px 10px;border-bottom:1px solid var(--line);font-size:.95rem}
+    tr:last-child td{border-bottom:none}
+    tbody tr.click{cursor:pointer} tbody tr.click:hover{background:var(--panel2)}
+    .tk{display:flex;align-items:center;gap:10px}
+    .tk .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;flex:0 0 auto}
+    .tk .nm{font-weight:700} .tk .sb{font-size:.78rem;color:var(--muted)}
+    .pill{font-size:.78rem;font-weight:700;padding:3px 8px;border-radius:7px}
+    .pill.g{background:rgba(22,199,132,.14);color:var(--green)} .pill.r{background:rgba(234,57,67,.14);color:var(--red)}
+    .spark{width:90px;height:30px}
+    .btn{font-family:inherit;font-weight:700;font-size:.85rem;border:none;border-radius:9px;padding:8px 14px;cursor:pointer}
+    .btn.buy{background:var(--green);color:#04130c} .btn.sell{background:var(--red);color:#fff}
+    .btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+    .btn:hover{filter:brightness(1.08)}
+    .search{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);
+      border-radius:11px;padding:11px 15px;font-size:.95rem;font-family:inherit;margin-bottom:14px}
+    .search:focus{outline:none;border-color:var(--accent)}
+    .empty{text-align:center;color:var(--muted);padding:36px 20px}
+
+    /* ===== Learn ===== */
+    .learn{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .lc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+    .lc .em{font-size:1.8rem} .lc h4{margin:8px 0 6px;font-size:1.05rem}
+    .lc p{color:var(--muted);font-size:.9rem}
+    .risk{background:rgba(234,57,67,.08);border:1px solid rgba(234,57,67,.3);border-radius:14px;padding:18px;margin-top:18px}
+    .risk h4{color:var(--red);margin-bottom:6px}
+
+    /* ===== Modal ===== */
+    .modal{position:fixed;inset:0;background:rgba(5,7,11,.7);backdrop-filter:blur(4px);
+      display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+    .modal.show{display:flex}
+    .sheet{background:var(--bg2);border:1px solid var(--line);border-radius:18px;width:100%;max-width:480px;
+      max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+    .sheet .top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+    .sheet .top .x{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer}
+    .sheet .body{padding:20px}
+    .price-now{font-size:2rem;font-weight:800}
+    .tabs{display:flex;gap:6px;margin:16px 0 14px;background:var(--panel);border-radius:11px;padding:4px}
+    .tabs button{flex:1;background:none;border:none;color:var(--muted);font-weight:700;padding:9px;border-radius:8px;cursor:pointer;font-family:inherit}
+    .tabs button.on.buy{background:var(--green);color:#04130c} .tabs button.on.sell{background:var(--red);color:#fff}
+    .field{margin-bottom:14px} .field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px}
+    .field input{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);
+      border-radius:10px;padding:11px 14px;font-size:1.1rem;font-family:inherit}
+    .qbtns{display:flex;gap:6px;margin-top:8px}
+    .qbtns button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+      border-radius:8px;padding:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+    .recap{display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--muted)}
+    .recap b{color:var(--text)}
+    .confirm{width:100%;font-size:1rem;padding:13px;margin-top:8px}
+    .msg{font-size:.85rem;color:var(--red);text-align:center;min-height:1.2em;margin-top:8px}
+
+    .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(120px);
+      background:var(--panel2);border:1px solid var(--line);padding:12px 20px;border-radius:11px;font-weight:600;
+      transition:transform .35s cubic-bezier(.16,1,.3,1);z-index:90}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    footer{border-top:1px solid var(--line);color:var(--muted);font-size:.82rem;text-align:center;padding:26px 20px;line-height:1.8}
+    footer a{color:var(--accent);text-decoration:none}
+
+    @media(max-width:780px){
+      .cards{grid-template-columns:repeat(2,1fr)} .learn{grid-template-columns:1fr}
+      .navlinks{order:3;flex-basis:100%;overflow-x:auto} .nav{flex-wrap:wrap}
+      .spark,.hide-sm{display:none}
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand"><span class="mk">↗</span>Investo</div>
+    <div class="navlinks">
+      <button data-v="dash" class="on">Tableau de bord</button>
+      <button data-v="market">Marché</button>
+      <button data-v="portfolio">Portefeuille</button>
+      <button data-v="learn">Apprendre</button>
+    </div>
+    <div class="balance"><span class="lbl">Liquidités</span><span class="val mono" id="navCash">—</span></div>
+  </nav>
+  <div class="disclaimer">⚠️ <b>Simulation éducative</b> — argent <b>100&nbsp;% virtuel</b>, cours de marché fictifs/simulés. Ceci n'est <b>pas</b> un conseil en investissement.</div>
+
+  <main>
+    <!-- ===== DASHBOARD ===== -->
+    <section class="view active" id="view-dash">
+      <h2 class="vt">Tableau de bord</h2>
+      <p class="vsub">Vue d'ensemble de ton portefeuille virtuel.</p>
+      <div class="cards">
+        <div class="stat"><div class="k">Valeur totale</div><div class="v mono" id="dTotal">—</div><div class="d mono" id="dTotalD">—</div></div>
+        <div class="stat"><div class="k">Liquidités</div><div class="v mono" id="dCash">—</div><div class="d" style="color:var(--muted)">disponible</div></div>
+        <div class="stat"><div class="k">Investi</div><div class="v mono" id="dInvested">—</div><div class="d" style="color:var(--muted)">valeur des actions</div></div>
+        <div class="stat"><div class="k">Plus/moins-value</div><div class="v mono" id="dPnl">—</div><div class="d mono" id="dPnlPct">—</div></div>
+      </div>
+      <div class="panel">
+        <h3>Évolution du portefeuille</h3>
+        <div class="chart-wrap"><canvas id="pfChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>Top mouvements du marché</h3>
+        <table><tbody id="moversBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ===== MARKET ===== -->
+    <section class="view" id="view-market">
+      <h2 class="vt">Marché</h2>
+      <p class="vsub">Cours simulés, mis à jour en direct. Clique une action pour trader.</p>
+      <input class="search" id="search" placeholder="🔍 Rechercher une action (ex : Apple, LVMH, NVDA…)" />
+      <div class="panel" style="padding:6px 8px">
+        <table>
+          <thead><tr><th>Action</th><th class="r">Cours</th><th class="r">Var. jour</th><th class="r hide-sm">7 jours</th><th class="r"></th></tr></thead>
+          <tbody id="marketBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== PORTFOLIO ===== -->
+    <section class="view" id="view-portfolio">
+      <h2 class="vt">Portefeuille</h2>
+      <p class="vsub">Tes positions et leurs performances.</p>
+      <div class="cards" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat"><div class="k">Valeur totale</div><div class="v mono" id="pTotal">—</div></div>
+        <div class="stat"><div class="k">Liquidités</div><div class="v mono" id="pCash">—</div></div>
+        <div class="stat"><div class="k">+/- value totale</div><div class="v mono" id="pPnl">—</div></div>
+      </div>
+      <div class="panel" style="padding:6px 8px">
+        <table>
+          <thead><tr><th>Action</th><th class="r">Qté</th><th class="r hide-sm">PRU</th><th class="r">Cours</th><th class="r">Valeur</th><th class="r">+/-</th><th class="r"></th></tr></thead>
+          <tbody id="pfBody"></tbody>
+        </table>
+      </div>
+      <div style="text-align:center"><button class="btn ghost" id="resetBtn">↺ Réinitialiser le portefeuille (100 000 € virtuels)</button></div>
+    </section>
+
+    <!-- ===== LEARN ===== -->
+    <section class="view" id="view-learn">
+      <h2 class="vt">Apprendre à investir</h2>
+      <p class="vsub">Les bases, expliquées simplement.</p>
+      <div class="learn">
+        <div class="lc"><div class="em">📈</div><h4>Qu'est-ce qu'une action ?</h4><p>Acheter une action, c'est posséder une petite part d'une entreprise. Si elle prospère, ta part prend de la valeur — et inversement.</p></div>
+        <div class="lc"><div class="em">🧺</div><h4>Diversifier</h4><p>Ne mets pas tous tes œufs dans le même panier. Répartir entre plusieurs entreprises et secteurs réduit le risque global.</p></div>
+        <div class="lc"><div class="em">⏳</div><h4>Penser long terme</h4><p>La bourse monte et descend au quotidien. Historiquement, c'est sur le long terme (10 ans+) que les marchés récompensent la patience.</p></div>
+        <div class="lc"><div class="em">⚖️</div><h4>Comprendre le risque</h4><p>Plus le rendement potentiel est élevé, plus le risque l'est aussi. N'investis jamais un argent dont tu as besoin à court terme.</p></div>
+        <div class="lc"><div class="em">💸</div><h4>Attention aux frais</h4><p>Frais de courtage, de gestion… ils grignotent ta performance sur la durée. Les comparer fait une vraie différence.</p></div>
+        <div class="lc"><div class="em">📊</div><h4>Les ETF</h4><p>Un ETF (ou tracker) réplique un indice entier (ex : MSCI World) en une seule ligne : diversification instantanée à faible coût.</p></div>
+      </div>
+      <div class="risk">
+        <h4>⚠️ Avertissement</h4>
+        <p>Investo est un <b>simulateur pédagogique</b>. Les cours sont fictifs/simulés, aucun argent réel n'est en jeu, et rien ici ne constitue un conseil en investissement. Investir comporte un risque de perte en capital. Renseigne-toi auprès de sources fiables et, au besoin, d'un conseiller agréé avant tout investissement réel.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Investo — simulateur d'investissement éducatif · argent virtuel · données de marché simulées<br>
+    Un projet d'<a href="/">Axel Courty</a> · code sur <a href="https://github.com/coaxel2/planbadge-tp1" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+
+  <!-- ===== Trade modal ===== -->
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <div class="top">
+        <div class="tk"><div class="ic" id="mIc"></div><div><div class="nm" id="mName"></div><div class="sb" id="mSym"></div></div></div>
+        <button class="x" id="mClose">✕</button>
+      </div>
+      <div class="body">
+        <div class="price-now mono" id="mPrice"></div>
+        <div class="mono" id="mChange" style="font-weight:700;font-size:.95rem"></div>
+        <div class="chart-wrap" style="height:160px;margin:14px 0"><canvas id="mChart"></canvas></div>
+        <div class="tabs">
+          <button id="tabBuy" class="on buy" data-side="buy">Acheter</button>
+          <button id="tabSell" data-side="sell">Vendre</button>
+        </div>
+        <div class="field">
+          <label id="qLabel">Quantité</label>
+          <input id="qInput" type="number" min="0" step="1" value="1" />
+          <div class="qbtns"><button data-q="1">+1</button><button data-q="5">+5</button><button data-q="10">+10</button><button data-q="max">Max</button></div>
+        </div>
+        <div class="recap"><span>Prix unitaire</span><b class="mono" id="rUnit"></b></div>
+        <div class="recap"><span id="rTotalLbl">Coût total</span><b class="mono" id="rTotal"></b></div>
+        <div class="recap" id="rAvailRow"><span id="rAvailLbl">Liquidités dispo.</span><b class="mono" id="rAvail"></b></div>
+        <button class="btn buy confirm" id="confirmBtn">Acheter</button>
+        <div class="msg" id="tradeMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function(){
+    "use strict";
+    const $=id=>document.getElementById(id);
+    const fmt=n=>n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const eur=n=>fmt(n)+' €';
+    const pct=n=>(n>=0?'+':'')+n.toFixed(2)+' %';
+
+    // ---- Univers d'actions réelles connues (cours réalistes récents, snapshot) ----
+    const DEF=[
+      // Tech & semi US
+      ['AAPL','Apple','Tech',225],['MSFT','Microsoft','Tech',430],['NVDA','Nvidia','Semi',130],['GOOGL','Alphabet','Tech',175],['AMZN','Amazon','Conso',185],['META','Meta','Tech',560],['TSLA','Tesla','Auto',250],['AVGO','Broadcom','Semi',165],['ORCL','Oracle','Tech',175],['ADBE','Adobe','Logiciel',500],['CRM','Salesforce','Logiciel',290],['AMD','AMD','Semi',145],['INTC','Intel','Semi',22],['NFLX','Netflix','Média',700],['CSCO','Cisco','Tech',55],['QCOM','Qualcomm','Semi',170],['TXN','Texas Instruments','Semi',200],['IBM','IBM','Tech',220],['NOW','ServiceNow','Logiciel',900],['INTU','Intuit','Logiciel',640],['AMAT','Applied Materials','Semi',190],['MU','Micron','Semi',100],['LRCX','Lam Research','Semi',80],['ADI','Analog Devices','Semi',230],['PANW','Palo Alto Networks','Cyber',360],['SNPS','Synopsys','Logiciel',520],['CDNS','Cadence','Logiciel',300],['UBER','Uber','Tech',75],['PYPL','PayPal','Fintech',75],['SHOP','Shopify','E-commerce',80],['SQ','Block','Fintech',70],['SNOW','Snowflake','Logiciel',120],['PLTR','Palantir','Logiciel',60],['COIN','Coinbase','Crypto',200],['ABNB','Airbnb','Voyage',130],['SPOT','Spotify','Média',400],['DASH','DoorDash','Tech',140],['MSTR','MicroStrategy','Crypto',180],['DELL','Dell','Tech',120],['HPQ','HP','Tech',35],['MRVL','Marvell','Semi',85],['ARM','Arm','Semi',140],['NET','Cloudflare','Cyber',110],['DDOG','Datadog','Logiciel',130],['CRWD','CrowdStrike','Cyber',350],['ZS','Zscaler','Cyber',200],['MDB','MongoDB','Logiciel',280],['TEAM','Atlassian','Logiciel',230],['WDAY','Workday','Logiciel',250],['HOOD','Robinhood','Fintech',35],['RDDT','Reddit','Média',150],['DUOL','Duolingo','Logiciel',300],['ROKU','Roku','Média',75],['ZM','Zoom','Logiciel',70],
+      // Finance US
+      ['BRK-B','Berkshire Hathaway','Finance',460],['JPM','JPMorgan Chase','Banque',215],['V','Visa','Fintech',280],['MA','Mastercard','Fintech',480],['BAC','Bank of America','Banque',40],['WFC','Wells Fargo','Banque',60],['GS','Goldman Sachs','Banque',500],['MS','Morgan Stanley','Banque',105],['C','Citigroup','Banque',65],['AXP','American Express','Finance',270],['BLK','BlackRock','Finance',950],['SCHW','Charles Schwab','Finance',70],['SPGI','S&P Global','Finance',500],
+      // Conso US
+      ['WMT','Walmart','Distribution',80],['COST','Costco','Distribution',880],['HD','Home Depot','Distribution',400],['LOW','Lowe’s','Distribution',250],['TGT','Target','Distribution',150],['NKE','Nike','Conso',80],['SBUX','Starbucks','Conso',95],['MCD','McDonald’s','Conso',290],['KO','Coca-Cola','Conso',70],['PEP','PepsiCo','Conso',170],['PG','Procter & Gamble','Conso',170],['CL','Colgate-Palmolive','Conso',100],['MDLZ','Mondelez','Conso',70],['KHC','Kraft Heinz','Conso',35],['LULU','Lululemon','Conso',330],
+      // Santé US
+      ['UNH','UnitedHealth','Santé',580],['JNJ','Johnson & Johnson','Santé',160],['LLY','Eli Lilly','Pharma',900],['ABBV','AbbVie','Pharma',195],['MRK','Merck','Pharma',110],['PFE','Pfizer','Pharma',28],['TMO','Thermo Fisher','Santé',570],['ABT','Abbott','Santé',115],['DHR','Danaher','Santé',250],['BMY','Bristol-Myers','Pharma',50],['AMGN','Amgen','Pharma',320],['GILD','Gilead','Pharma',75],['CVS','CVS Health','Santé',60],['MDT','Medtronic','Santé',85],['ISRG','Intuitive Surgical','Santé',480],['MRNA','Moderna','Pharma',60],
+      // Industrie & énergie US
+      ['XOM','ExxonMobil','Énergie',115],['CVX','Chevron','Énergie',150],['COP','ConocoPhillips','Énergie',105],['BA','Boeing','Aéronautique',175],['CAT','Caterpillar','Industrie',380],['GE','GE Aerospace','Industrie',180],['HON','Honeywell','Industrie',215],['UPS','UPS','Logistique',130],['RTX','RTX','Défense',120],['LMT','Lockheed Martin','Défense',570],['DE','Deere','Industrie',410],['MMM','3M','Industrie',130],['F','Ford','Auto',11],['GM','General Motors','Auto',50],['RIVN','Rivian','Auto',12],['LCID','Lucid','Auto',3],
+      // Média & télécom US
+      ['DIS','Disney','Média',95],['CMCSA','Comcast','Média',40],['T','AT&T','Télécom',22],['VZ','Verizon','Télécom',42],['TMUS','T-Mobile','Télécom',210],['WBD','Warner Bros Discovery','Média',10],
+      // France — CAC 40
+      ['MC','LVMH','Luxe',640],['OR','L’Oréal','Luxe',380],['RMS','Hermès','Luxe',2100],['KER','Kering','Luxe',240],['TTE','TotalEnergies','Énergie',60],['SAN','Sanofi','Pharma',95],['AIR','Airbus','Aéronautique',150],['SU','Schneider Electric','Industrie',230],['AI','Air Liquide','Chimie',165],['EL','EssilorLuxottica','Santé',230],['DG','Vinci','Construction',105],['SAF','Safran','Aéronautique',215],['CS','AXA','Assurance',35],['BNP','BNP Paribas','Banque',62],['ACA','Crédit Agricole','Banque',14],['GLE','Société Générale','Banque',26],['DSY','Dassault Systèmes','Logiciel',35],['CAP','Capgemini','Tech',160],['BN','Danone','Conso',65],['RI','Pernod Ricard','Conso',110],['ML','Michelin','Auto',35],['STLAP','Stellantis','Auto',12],['ENGI','Engie','Énergie',16],['ORA','Orange','Télécom',11],['VIE','Veolia','Environnement',28],['EN','Bouygues','Construction',32],['HO','Thales','Défense',155],['LR','Legrand','Industrie',95],['PUB','Publicis','Publicité',95],['RNO','Renault','Auto',45],['ALO','Alstom','Industrie',22],
+      // Europe
+      ['ASML','ASML','Semi',700],['SAP','SAP','Logiciel',220],['SIE','Siemens','Industrie',175],['NESN','Nestlé','Conso',90],['NOVN','Novartis','Pharma',100],['ROG','Roche','Pharma',270],['AZN','AstraZeneca','Pharma',120],['ULVR','Unilever','Conso',48],['HSBA','HSBC','Banque',7],['SHEL','Shell','Énergie',30],['BP','BP','Énergie',5],['MBG','Mercedes-Benz','Auto',60],['BMW','BMW','Auto',80],['VOW3','Volkswagen','Auto',95],['BAS','BASF','Chimie',45],['ALV','Allianz','Assurance',290],['ADS','Adidas','Conso',230],['DTE','Deutsche Telekom','Télécom',28],['IBE','Iberdrola','Énergie',13],['SANT','Banco Santander','Banque',4.5],['ITX','Inditex','Distribution',50],['ENEL','Enel','Énergie',7],['STMP','STMicroelectronics','Semi',25],['RIO','Rio Tinto','Mines',50],['GLEN','Glencore','Mines',4],['BARC','Barclays','Banque',2.5],['GSK','GSK','Pharma',15],['DGE','Diageo','Conso',25],['NVO','Novo Nordisk','Pharma',100],['UBSG','UBS','Banque',28],['VOD','Vodafone','Télécom',0.7],['PRX','Prosus','Tech',38],
+      // Asie & autres
+      ['TSM','TSMC','Semi',180],['BABA','Alibaba','E-commerce',90],['TM','Toyota','Auto',180],['SONY','Sony','Conso',95],['JD','JD.com','E-commerce',35],['PDD','PDD Holdings','E-commerce',130],['NIO','Nio','Auto',5],['BIDU','Baidu','Tech',90],['HMC','Honda','Auto',30],['SE','Sea Ltd','Tech',100],['INFY','Infosys','Tech',20],
+      // ETF & indices
+      ['SPY','S&P 500 ETF','ETF',580],['QQQ','Nasdaq 100 ETF','ETF',500],['CW8','MSCI World ETF','ETF',520],['VTI','Total US Market ETF','ETF',290],['EEM','Marchés émergents ETF','ETF',45],['GLD','Or (ETF)','Matières',250]
+    ];
+    // couleur dérivée du symbole (pas besoin de la coder à la main pour chaque action)
+    function colorFor(sym){ let h=0; for(let i=0;i<sym.length;i++) h=(h*31+sym.charCodeAt(i))%360; return 'hsl('+h+',52%,42%)'; }
+    function genHist(price){ // 80 points jusqu'au cours actuel — fortes variations
+      const arr=[]; let p=price*(0.6+Math.random()*0.3);
+      for(let i=0;i<79;i++){ p*=1+(Math.random()-0.5)*0.05; arr.push(p); }
+      arr.push(price); return arr;
+    }
+    const STOCKS=DEF.map(d=>{
+      const hist=genHist(d[3]);
+      return {sym:d[0],name:d[1],sector:d[2],color:colorFor(d[0]),price:d[3],open:d[3],hist};
+    });
+    const bySym=s=>STOCKS.find(x=>x.sym===s);
+
+    // ---- Portefeuille (persistant) ----
+    const KEY='investo_v2', START=100000;
+    function blank(){return {cash:START, hold:{}, pf:[START]};} // pf = historique valeur portefeuille
+    let store; try{store=JSON.parse(localStorage.getItem(KEY))||blank();}catch(e){store=blank();}
+    if(!store.pf) store.pf=[store.cash];
+    const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}};
+
+    const invested=()=>Object.entries(store.hold).reduce((s,[sy,h])=>s+h.qty*bySym(sy).price,0);
+    const costBasis=()=>Object.entries(store.hold).reduce((s,[sy,h])=>s+h.qty*h.avg,0);
+    const total=()=>store.cash+invested();
+
+    // ---- Graphiques ----
+    function draw(canvas,data,color){
+      if(!canvas||!canvas.clientWidth) return;
+      const dpr=window.devicePixelRatio||1, w=canvas.clientWidth, h=canvas.clientHeight;
+      canvas.width=w*dpr; canvas.height=h*dpr;
+      const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
+      if(data.length<2) return;
+      const min=Math.min(...data),max=Math.max(...data),pad=6;
+      const X=i=>pad+(i/(data.length-1))*(w-2*pad), Y=v=>h-pad-((v-min)/((max-min)||1))*(h-2*pad);
+      const up=data[data.length-1]>=data[0], col=color||(up?'#16c784':'#ea3943');
+      ctx.beginPath(); data.forEach((v,i)=>{const x=X(i),y=Y(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+      ctx.lineTo(X(data.length-1),h-pad); ctx.lineTo(X(0),h-pad); ctx.closePath();
+      const g=ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,col+'44'); g.addColorStop(1,col+'00'); ctx.fillStyle=g; ctx.fill();
+      ctx.beginPath(); data.forEach((v,i)=>{const x=X(i),y=Y(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+      ctx.strokeStyle=col; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+    }
+
+    function iconEl(s){const e=document.createElement('div');e.className='ic';e.style.background=s.color;e.textContent=s.sym.slice(0,2);return e;}
+
+    // ---- Vues ----
+    let current='dash';
+    document.querySelectorAll('.navlinks button').forEach(b=>b.onclick=()=>{
+      current=b.dataset.v;
+      document.querySelectorAll('.navlinks button').forEach(x=>x.classList.toggle('on',x===b));
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      $('view-'+current).classList.add('active');
+      renderAll();
+    });
+
+    function renderDash(){
+      const t=total(), cb=costBasis(), inv=invested(), pnl=inv-cb;
+      const dayChange=STOCKS.reduce((s,x)=>{const h=store.hold[x.sym];return s+(h?h.qty*(x.price-x.open):0);},0);
+      $('dTotal').textContent=eur(t);
+      $('dTotalD').innerHTML='<span class="'+(dayChange>=0?'up':'down')+'">'+(dayChange>=0?'+':'')+eur(dayChange)+' aujourd\'hui</span>';
+      $('dCash').textContent=eur(store.cash);
+      $('dInvested').textContent=eur(inv);
+      $('dPnl').innerHTML='<span class="'+(pnl>=0?'up':'down')+'">'+(pnl>=0?'+':'')+eur(pnl)+'</span>';
+      $('dPnlPct').innerHTML=cb>0?'<span class="'+(pnl>=0?'up':'down')+'">'+pct(pnl/cb*100)+'</span>':'<span style="color:var(--muted)">—</span>';
+      draw($('pfChart'), store.pf.slice(-120));
+      const movers=[...STOCKS].sort((a,b)=>Math.abs(chgPct(b))-Math.abs(chgPct(a))).slice(0,5);
+      $('moversBody').innerHTML='';
+      movers.forEach(s=>$('moversBody').appendChild(marketRow(s,false)));
+    }
+    const chgPct=s=>(s.price-s.open)/s.open*100;
+
+    function marketRow(s,withBtn){
+      const tr=document.createElement('tr'); tr.className='click'; tr.dataset.sym=s.sym; tr.onclick=()=>openTrade(s.sym);
+      const c=chgPct(s);
+      const td1=document.createElement('td'); const tk=document.createElement('div'); tk.className='tk';
+      tk.appendChild(iconEl(s));
+      const meta=document.createElement('div'); meta.innerHTML='<div class="nm">'+s.name+'</div><div class="sb">'+s.sym+' · '+s.sector+'</div>';
+      tk.appendChild(meta); td1.appendChild(tk); tr.appendChild(td1);
+      const td2=document.createElement('td'); td2.className='r mono px'; td2.textContent=eur(s.price); tr.appendChild(td2);
+      const td3=document.createElement('td'); td3.className='r';
+      td3.innerHTML='<span class="pill '+(c>=0?'g':'r')+'">'+pct(c)+'</span>'; tr.appendChild(td3);
+      const td4=document.createElement('td'); td4.className='r hide-sm';
+      const cv=document.createElement('canvas'); cv.className='spark'; td4.appendChild(cv); tr.appendChild(td4);
+      const td5=document.createElement('td'); td5.className='r';
+      const b=document.createElement('button'); b.className='btn buy'; b.textContent='Trader';
+      b.onclick=e=>{e.stopPropagation();openTrade(s.sym);}; td5.appendChild(b); tr.appendChild(td5);
+      setTimeout(()=>draw(cv,s.hist.slice(-30)),0);
+      return tr;
+    }
+
+    function renderMarket(){
+      const q=($('search').value||'').toLowerCase();
+      const list=STOCKS.filter(s=>s.name.toLowerCase().includes(q)||s.sym.toLowerCase().includes(q)||s.sector.toLowerCase().includes(q));
+      const body=$('marketBody'); body.innerHTML='';
+      if(!list.length){body.innerHTML='<tr><td colspan="5"><div class="empty">Aucune action trouvée.</div></td></tr>';return;}
+      list.forEach(s=>body.appendChild(marketRow(s,true)));
+    }
+    $('search').addEventListener('input',renderMarket);
+    // mise à jour "en place" des lignes du marché (sans tout reconstruire) — fluide même avec ~180 actions
+    function updateMarketLive(){
+      document.querySelectorAll('#marketBody tr[data-sym]').forEach(tr=>{
+        const s=bySym(tr.dataset.sym); if(!s) return;
+        const c=chgPct(s);
+        const px=tr.querySelector('.px'); if(px) px.textContent=eur(s.price);
+        const pill=tr.querySelector('.pill'); if(pill){ pill.className='pill '+(c>=0?'g':'r'); pill.textContent=pct(c); }
+        const cv=tr.querySelector('.spark'); if(cv) draw(cv, s.hist.slice(-30));
+      });
+    }
+
+    function renderPortfolio(){
+      $('pTotal').textContent=eur(total()); $('pCash').textContent=eur(store.cash);
+      const cb=costBasis(), pnl=invested()-cb;
+      $('pPnl').innerHTML='<span class="'+(pnl>=0?'up':'down')+'">'+(pnl>=0?'+':'')+eur(pnl)+(cb>0?' ('+pct(pnl/cb*100)+')':'')+'</span>';
+      const body=$('pfBody'); body.innerHTML='';
+      const entries=Object.entries(store.hold).filter(([,h])=>h.qty>0);
+      if(!entries.length){body.innerHTML='<tr><td colspan="7"><div class="empty">Tu ne détiens aucune action.<br>Rends-toi dans <b>Marché</b> pour passer ton premier ordre. 📈</div></td></tr>';return;}
+      entries.forEach(([sy,h])=>{
+        const s=bySym(sy), val=h.qty*s.price, pl=(s.price-h.avg)*h.qty, plp=(s.price-h.avg)/h.avg*100;
+        const tr=document.createElement('tr');
+        const c1=document.createElement('td'); const tk=document.createElement('div'); tk.className='tk';
+        tk.appendChild(iconEl(s)); const m=document.createElement('div'); m.innerHTML='<div class="nm">'+s.name+'</div><div class="sb">'+s.sym+'</div>';
+        tk.appendChild(m); c1.appendChild(tk); tr.appendChild(c1);
+        tr.innerHTML+='<td class="r mono">'+h.qty+'</td><td class="r mono hide-sm">'+eur(h.avg)+'</td><td class="r mono">'+eur(s.price)+'</td><td class="r mono">'+eur(val)+'</td>'+
+          '<td class="r mono '+(pl>=0?'up':'down')+'">'+(pl>=0?'+':'')+eur(pl)+'<br><span style="font-size:.78rem">'+pct(plp)+'</span></td>';
+        const c7=document.createElement('td'); c7.className='r';
+        const b=document.createElement('button'); b.className='btn sell'; b.textContent='Vendre'; b.onclick=()=>openTrade(sy,'sell'); c7.appendChild(b); tr.appendChild(c7);
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAll(){
+      $('navCash').textContent=eur(store.cash);
+      if(current==='dash')renderDash();
+      else if(current==='market')renderMarket();
+      else if(current==='portfolio')renderPortfolio();
+    }
+
+    // ---- Modal de trade ----
+    let mSym=null, side='buy';
+    function openTrade(sym,initSide){
+      mSym=sym; side=initSide||'buy';
+      const s=bySym(sym);
+      $('mIc').style.background=s.color; $('mIc').textContent=s.sym.slice(0,2);
+      $('mName').textContent=s.name; $('mSym').textContent=s.sym+' · '+s.sector;
+      $('qInput').value=1; $('tradeMsg').textContent='';
+      setSide(side);
+      $('modal').classList.add('show');
+      setTimeout(()=>{draw($('mChart'),s.hist.slice(-60)); refreshModal();},0);
+    }
+    function setSide(sd){
+      side=sd;
+      $('tabBuy').classList.toggle('on',sd==='buy'); $('tabBuy').classList.toggle('buy',sd==='buy');
+      $('tabSell').classList.toggle('on',sd==='sell'); $('tabSell').classList.toggle('sell',sd==='sell');
+      $('confirmBtn').className='btn confirm '+(sd==='buy'?'buy':'sell');
+      $('confirmBtn').textContent=sd==='buy'?'Acheter':'Vendre';
+      $('rTotalLbl').textContent=sd==='buy'?'Coût total':'Produit de la vente';
+      refreshModal();
+    }
+    $('tabBuy').onclick=()=>setSide('buy'); $('tabSell').onclick=()=>setSide('sell');
+    document.querySelectorAll('.qbtns button').forEach(b=>b.onclick=()=>{
+      const s=bySym(mSym);
+      if(b.dataset.q==='max'){
+        $('qInput').value= side==='buy'? Math.floor(store.cash/s.price) : (store.hold[mSym]?store.hold[mSym].qty:0);
+      } else { $('qInput').value=Math.max(0,(parseInt($('qInput').value)||0)+parseInt(b.dataset.q)); }
+      refreshModal();
+    });
+    $('qInput').addEventListener('input',refreshModal);
+    function refreshModal(){
+      const s=bySym(mSym), q=Math.max(0,parseInt($('qInput').value)||0), tot=q*s.price;
+      const c=chgPct(s);
+      $('mPrice').textContent=eur(s.price);
+      $('mChange').innerHTML='<span class="'+(c>=0?'up':'down')+'">'+pct(c)+' aujourd\'hui</span>';
+      $('rUnit').textContent=eur(s.price); $('rTotal').textContent=eur(tot);
+      if(side==='buy'){ $('rAvailLbl').textContent='Liquidités dispo.'; $('rAvail').textContent=eur(store.cash); }
+      else{ const owned=store.hold[mSym]?store.hold[mSym].qty:0; $('rAvailLbl').textContent='Actions détenues'; $('rAvail').textContent=owned+' ('+eur(owned*s.price)+')'; }
+    }
+    $('confirmBtn').onclick=()=>{
+      const s=bySym(mSym), q=Math.max(0,parseInt($('qInput').value)||0), tot=q*s.price, msg=$('tradeMsg');
+      if(q<=0){msg.textContent='Choisis une quantité.';return;}
+      if(side==='buy'){
+        if(tot>store.cash){msg.textContent='Liquidités insuffisantes.';return;}
+        store.cash-=tot;
+        const h=store.hold[mSym]||{qty:0,avg:0};
+        h.avg=(h.avg*h.qty+tot)/(h.qty+q); h.qty+=q; store.hold[mSym]=h;
+        toast('✅ Acheté '+q+' × '+s.sym+' pour '+eur(tot));
+      } else {
+        const owned=store.hold[mSym]?store.hold[mSym].qty:0;
+        if(q>owned){msg.textContent='Tu ne détiens que '+owned+' action(s).';return;}
+        store.cash+=tot; store.hold[mSym].qty-=owned===q?owned:q;
+        if(store.hold[mSym].qty<=0) delete store.hold[mSym];
+        toast('💸 Vendu '+q+' × '+s.sym+' pour '+eur(tot));
+      }
+      save(); $('modal').classList.remove('show'); renderAll();
+    };
+    $('mClose').onclick=()=>$('modal').classList.remove('show');
+    $('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.remove('show');});
+
+    $('resetBtn').onclick=()=>{ if(confirm('Réinitialiser ton portefeuille à 100 000 € virtuels ?')){ store=blank(); save(); renderAll(); toast('Portefeuille réinitialisé.'); } };
+
+    let tT;
+    function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>e.classList.remove('show'),2200);}
+
+    // ---- Simulation "temps réel" ----
+    function tick(){
+      STOCKS.forEach(s=>{
+        // variation de base ±1,5 % + saut occasionnel (5 % de chance) jusqu'à ±6 %
+        const jump = Math.random()<0.05 ? (Math.random()-0.5)*0.12 : 0;
+        s.price=Math.max(0.5, s.price*(1+(Math.random()-0.5)*0.03 + jump));
+        s.hist.push(s.price); if(s.hist.length>120)s.hist.shift();
+      });
+      store.pf.push(total()); if(store.pf.length>300)store.pf.shift(); save();
+      $('navCash').textContent=eur(store.cash);
+      if(current==='market') updateMarketLive();
+      else if(current==='dash') renderDash();
+      else if(current==='portfolio') renderPortfolio();
+    }
+    setInterval(tick, 3000);
+
+    window.addEventListener('resize',()=>{renderAll(); if($('modal').classList.contains('show'))draw($('mChart'),bySym(mSym).hist.slice(-60));});
+    renderAll();
+  })();
+  </script>
+</body>
+</html>
