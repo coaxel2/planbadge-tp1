@@ -56,7 +56,7 @@ Démontre le cycle complet **frontend → API → persistance → déploiement**
 ```bash
 cd livredor
 docker build -t livredor .
-docker run -d --name livredor -p 127.0.0.1:3000:3000 -v "$PWD/data:/data" livredor
+docker run -d --name livredor -p 127.0.0.1:3000:3000 -v livredor_data:/data livredor
 # http://localhost:3000
 ```
 

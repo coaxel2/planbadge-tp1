@@ -8,6 +8,7 @@ const PORT = 3000;
 const DATA_DIR = '/data';
 const DATA_FILE = path.join(DATA_DIR, 'messages.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const MAX_BODY = 5000;
 
 function loadMessages() {
   try {
@@ -18,8 +19,19 @@ function loadMessages() {
 }
 
 function saveMessages(msgs) {
-  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+  fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(DATA_FILE, JSON.stringify(msgs, null, 2));
+}
+
+// --- Sérialisation des écritures : évite la perte de messages en cas de POST concurrents ---
+let writing = false;
+const queue = [];
+function enqueue(task) { queue.push(task); drain(); }
+function drain() {
+  if (writing || queue.length === 0) return;
+  writing = true;
+  const task = queue.shift();
+  task(function () { writing = false; drain(); });
 }
 
 const server = http.createServer((req, res) => {
@@ -35,11 +47,18 @@ const server = http.createServer((req, res) => {
   // --- API : ajouter un message ---
   if (req.method === 'POST' && url === '/api/messages') {
     let body = '';
+    let aborted = false;
     req.on('data', (c) => {
       body += c;
-      if (body.length > 5000) req.destroy();
+      if (body.length > MAX_BODY) {
+        aborted = true;
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Message trop long' }));
+        req.destroy();
+      }
     });
     req.on('end', () => {
+      if (aborted || res.writableEnded) return;
       let data;
       try { data = JSON.parse(body); } catch (e) { data = {}; }
       const name = String(data.name || 'Anonyme').trim().slice(0, 40) || 'Anonyme';
@@ -49,11 +68,21 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ error: 'Message vide' }));
         return;
       }
-      const msgs = loadMessages();
-      msgs.unshift({ name, message, date: new Date().toISOString() });
-      saveMessages(msgs.slice(0, 200));
-      res.writeHead(201, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true }));
+      enqueue(function (done) {
+        try {
+          const msgs = loadMessages();
+          msgs.unshift({ name, message, date: new Date().toISOString() });
+          saveMessages(msgs.slice(0, 200));
+          res.writeHead(201, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true }));
+        } catch (e) {
+          console.error('saveMessages error:', e.message);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Erreur serveur' }));
+        } finally {
+          done();
+        }
+      });
     });
     return;
   }
