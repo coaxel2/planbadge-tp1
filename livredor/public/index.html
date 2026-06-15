@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livre d'or — Axel Courty</title>
+  <style>
+    :root {
+      --bg1: #0f0c29; --bg2: #302b63; --bg3: #24243e;
+      --accent: #7c5cff; --accent2: #00d4ff;
+      --text: #f4f4fb; --muted: #a8a6c9;
+      --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh; color: var(--text); padding: 32px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(-45deg, var(--bg1), var(--bg2), var(--bg3), var(--bg1));
+      background-size: 400% 400%; animation: gradient 18s ease infinite;
+    }
+    @keyframes gradient { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 28px; }
+    h1 { font-size: 2rem; letter-spacing: -0.02em; }
+    header p { color: var(--muted); margin-top: 6px; }
+    .back { display:inline-block; margin-top:14px; color:var(--accent2); text-decoration:none; font-size:0.9rem; }
+    .back:hover { text-decoration: underline; }
+    form, .msg {
+      background: var(--card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 18px; padding: 22px; margin-bottom: 16px;
+    }
+    label { display:block; font-size:0.82rem; color:var(--muted); margin-bottom:6px; font-weight:600; }
+    input, textarea {
+      width: 100%; background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+      color: var(--text); border-radius: 12px; padding: 12px 14px; font-size: 1rem;
+      font-family: inherit; margin-bottom: 14px; resize: vertical;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    button {
+      width: 100%; cursor: pointer; border: none; border-radius: 12px; padding: 14px;
+      font-size: 1rem; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: default; transform:none; }
+    .msg { animation: rise 0.4s ease; }
+    @keyframes rise { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .msg .who { font-weight: 700; color: var(--accent2); }
+    .msg .when { font-size: 0.75rem; color: var(--muted); float: right; }
+    .msg .text { margin-top: 8px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+    .empty { text-align:center; color:var(--muted); padding: 20px; }
+    .count { color: var(--muted); font-size: 0.85rem; margin: 8px 4px 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>✍️ Livre d'or</h1>
+      <p>Laisse un petit mot — il sera visible par tout le monde.</p>
+      <a class="back" href="/">← Retour à ma page</a>
+    </header>
+
+    <form id="form">
+      <label for="name">Ton nom (optionnel)</label>
+      <input id="name" type="text" maxlength="40" placeholder="Anonyme" autocomplete="off" />
+      <label for="message">Ton message</label>
+      <textarea id="message" rows="3" maxlength="280" placeholder="Bravo pour le déploiement !" required></textarea>
+      <button type="submit" id="btn">Publier mon message</button>
+    </form>
+
+    <p class="count" id="count"></p>
+    <div id="list"></div>
+  </div>
+
+  <script>
+    const list = document.getElementById('list');
+    const countEl = document.getElementById('count');
+
+    function fmtDate(iso) {
+      try {
+        return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+      } catch (e) { return ''; }
+    }
+
+    function render(messages) {
+      list.innerHTML = '';
+      countEl.textContent = messages.length
+        ? messages.length + ' message' + (messages.length > 1 ? 's' : '')
+        : '';
+      if (!messages.length) {
+        const e = document.createElement('div');
+        e.className = 'empty';
+        e.textContent = 'Aucun message pour le moment. Sois le premier !';
+        list.appendChild(e);
+        return;
+      }
+      messages.forEach(function (m) {
+        const card = document.createElement('div');
+        card.className = 'msg';
+        const who = document.createElement('span');
+        who.className = 'who';
+        who.textContent = m.name;          // textContent => pas d'injection HTML
+        const when = document.createElement('span');
+        when.className = 'when';
+        when.textContent = fmtDate(m.date);
+        const text = document.createElement('div');
+        text.className = 'text';
+        text.textContent = m.message;       // idem, sécurisé
+        card.appendChild(when);
+        card.appendChild(who);
+        card.appendChild(text);
+        list.appendChild(card);
+      });
+    }
+
+    function load() {
+      fetch('api/messages').then(function (r) { return r.json(); }).then(render).catch(function () {});
+    }
+
+    document.getElementById('form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      const btn = document.getElementById('btn');
+      const name = document.getElementById('name').value;
+      const message = document.getElementById('message').value;
+      if (!message.trim()) return;
+      btn.disabled = true;
+      btn.textContent = 'Envoi…';
+      fetch('api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, message: message })
+      }).then(function () {
+        document.getElementById('message').value = '';
+        load();
+      }).finally(function () {
+        btn.disabled = false;
+        btn.textContent = 'Publier mon message';
+      });
+    });
+
+    load();
+  </script>
+</body>
+</html>
