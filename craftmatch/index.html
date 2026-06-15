@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CraftMatch ⛏️💚 — Rencontres entre joueurs Minecraft</title>
   <meta name="description" content="Trouve l'âme sœur qui partage ta seed. Swipe, matche et discute avec des joueurs Minecraft." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%235fae3a'/%3E%3Ctext x='50' y='73' font-size='56' text-anchor='middle' fill='white'%3E%E2%99%A5%3C/text%3E%3C/svg%3E" />
@@ -16,145 +16,150 @@
     :root {
       --grass: #5fae3a; --grass-d: #3d7a24; --grass-dd:#2c5a18;
       --sky: #7ec0ee; --gold: #ffd83d; --tnt: #d83a3a; --like:#3ddc84;
-      --ink: #2b2b2b; --paper:#fbf7ee; --panel:#234016;
+      --ink: #2b2b2b; --paper:#fbf7ee;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; overflow: hidden; }
+    html, body { height: 100%; }
     body {
-      font-family: 'VT323', monospace; font-size: 20px; color: #fff;
-      background: linear-gradient(180deg, var(--sky) 0%, #aee0ff 40%, var(--grass) 40%, var(--grass-d) 100%);
-      display: flex; align-items: center; justify-content: center;
+      font-family: 'VT323', monospace; font-size: 20px; color: #fff; overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% -20%, #9fd36b 0%, transparent 55%),
+        linear-gradient(180deg, #355e22 0%, #20330f 100%);
+      display: flex; align-items: center; justify-content: center; padding: 18px;
     }
     .pix { font-family: 'Press Start 2P', monospace; }
-    .app {
-      width: 100%; max-width: 430px; height: 100dvh; max-height: 880px;
-      background: #1d2a12; display: flex; flex-direction: column; position: relative;
-      box-shadow: 0 0 0 6px #000, 0 20px 60px rgba(0,0,0,.5); overflow: hidden;
-    }
-    /* Topbar */
-    .topbar {
-      background: var(--grass-d); border-bottom: 4px solid var(--grass-dd);
-      padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto;
-    }
-    .topbar .logo { font-family: 'Press Start 2P'; font-size: 0.8rem; }
-    .topbar .logo b { color: var(--gold); }
-    .topbar .reset { background: none; border: 2px solid rgba(255,255,255,.4); color: #fff;
-      font-family: 'VT323'; font-size: 18px; padding: 3px 10px; cursor: pointer; }
-    /* Views */
-    main { flex: 1 1 auto; position: relative; overflow: hidden; }
-    .view { position: absolute; inset: 0; display: none; flex-direction: column; }
-    .view.active { display: flex; }
 
-    /* ===== DISCOVER ===== */
-    #view-discover { padding: 16px; }
-    .deck { flex: 1 1 auto; position: relative; }
+    /* ===== Fenêtre desktop ===== */
+    .app {
+      display: flex; width: min(1000px, 97vw); height: min(680px, 94vh);
+      background: #16220c; border: 6px solid #000; box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      overflow: hidden;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar { width: 330px; flex: 0 0 330px; background: #1c2a10; border-right: 5px solid #000;
+      display: flex; flex-direction: column; }
+    .sb-head { background: var(--grass-d); border-bottom: 4px solid var(--grass-dd);
+      padding: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .sb-head .logo { font-family: 'Press Start 2P'; font-size: 0.78rem; }
+    .sb-head .logo b { color: var(--gold); }
+    .sb-head .reset { background: none; border: 2px solid rgba(255,255,255,.4); color: #fff;
+      font-family: 'VT323'; font-size: 17px; padding: 3px 9px; cursor: pointer; }
+    .discover-btn { margin: 14px; padding: 14px; background: var(--tnt); border: 4px solid #000;
+      box-shadow: 4px 4px 0 #000; color: #fff; font-family: 'Press Start 2P'; font-size: 0.7rem;
+      cursor: pointer; }
+    .discover-btn.on { background: var(--grass); }
+    .discover-btn:active { transform: translate(4px,4px); box-shadow: 0 0 0 #000; }
+    .sb-mh { font-family: 'Press Start 2P'; font-size: 0.62rem; color: var(--gold); padding: 8px 16px 6px; }
+    .sb-mh span { color: #cfe6b8; }
+    .mlist { flex: 1 1 auto; overflow-y: auto; padding: 4px 10px 12px; }
+    .mrow { display: flex; align-items: center; gap: 11px; background: #25371590; border: 3px solid #000;
+      padding: 9px 11px; margin-bottom: 9px; cursor: pointer; }
+    .mrow:hover, .mrow.active { background: #38501f; }
+    .mrow .av { font-size: 2rem; width: 42px; text-align: center; }
+    .mrow .mid { flex: 1 1 auto; min-width: 0; }
+    .mrow .mn { font-family: 'Press Start 2P'; font-size: 0.55rem; }
+    .mrow .lm { font-size: 1rem; color: #cfe6b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mrow .ub { background: var(--tnt); color: #fff; border: 2px solid #000; min-width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem; padding: 0 5px; }
+    .empty-matches { text-align: center; padding: 30px 18px; color: #9fc585; font-size: 1.15rem; line-height: 1.5; }
+
+    /* ===== Zone principale ===== */
+    .stage { flex: 1 1 auto; position: relative; background: #122209; }
+    .pane { position: absolute; inset: 0; display: none; flex-direction: column; }
+    .pane.active { display: flex; }
+
+    /* Deck */
+    #pane-deck { align-items: center; justify-content: center; gap: 18px; padding: 22px; }
+    .deck { position: relative; width: min(360px, 80%); height: 440px; }
     .card {
       position: absolute; inset: 0; background: var(--paper); color: var(--ink);
-      border: 5px solid #000; box-shadow: 6px 6px 0 #000;
-      display: flex; flex-direction: column; overflow: hidden; will-change: transform;
-      touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
-      cursor: grab;
+      border: 5px solid #000; box-shadow: 6px 6px 0 #000; display: flex; flex-direction: column;
+      overflow: hidden; will-change: transform; touch-action: none;
+      user-select: none; -webkit-user-select: none; -webkit-user-drag: none; cursor: grab;
     }
     .card * { pointer-events: none; }
-    .card .pic {
-      flex: 1 1 auto; display: flex; align-items: center; justify-content: center; position: relative;
-      background: repeating-linear-gradient(45deg, #9bd76e 0 26px, #8ccb5e 26px 52px);
-      font-size: 7rem;
-    }
-    .card .skin { filter: drop-shadow(5px 5px 0 rgba(0,0,0,.22)); pointer-events: none; }
-    .card .info { background: var(--paper); padding: 14px 16px 18px; border-top: 4px solid #000; }
-    .card .nm { font-family: 'Press Start 2P'; font-size: 0.78rem; color: #1c1c1c; }
-    .card .nm small { font-family: 'VT323'; font-size: 1.1rem; color: #666; margin-left: 6px; }
-    .card .dist { font-size: 1.05rem; color: var(--grass-d); margin: 6px 0 8px; }
-    .card .bio { font-size: 1.15rem; line-height: 1.25; color: #333; min-height: 2.6em; }
-    .card .tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-    .card .tags span { font-size: 0.95rem; background: var(--grass); color: #fff; padding: 2px 8px; border: 2px solid #000; }
-    .stamp {
-      position: absolute; top: 24px; font-family: 'Press Start 2P'; font-size: 1.4rem;
-      padding: 8px 12px; border: 5px solid; border-radius: 8px; opacity: 0; transform: rotate(-18deg);
-    }
-    .stamp.like { left: 18px; color: var(--like); border-color: var(--like); }
-    .stamp.nope { right: 18px; color: var(--tnt); border-color: var(--tnt); transform: rotate(18deg); }
-    .empty-deck { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      text-align:center; padding:30px; gap:18px; }
-    .empty-deck .big { font-size: 3rem; }
-    .empty-deck p { font-size: 1.3rem; line-height: 1.4; }
-    .actions { flex: 0 0 auto; display: flex; gap: 22px; justify-content: center; align-items: center; padding: 16px 0 4px; }
-    .ab {
-      width: 64px; height: 64px; border: 5px solid #000; box-shadow: 4px 4px 0 #000; cursor: pointer;
-      font-size: 1.6rem; display: flex; align-items: center; justify-content: center; transition: transform .08s;
-    }
+    .card .pic { flex: 1 1 auto; display: flex; align-items: center; justify-content: center;
+      background: repeating-linear-gradient(45deg, #9bd76e 0 26px, #8ccb5e 26px 52px); font-size: 6.5rem; }
+    .card .skin { filter: drop-shadow(5px 5px 0 rgba(0,0,0,.22)); }
+    .card .info { background: var(--paper); padding: 13px 15px 16px; border-top: 4px solid #000; }
+    .card .nm { font-family: 'Press Start 2P'; font-size: 0.72rem; color: #1c1c1c; }
+    .card .nm small { font-family: 'VT323'; font-size: 1.05rem; color: #666; margin-left: 6px; }
+    .card .dist { font-size: 1.02rem; color: var(--grass-d); margin: 6px 0 7px; }
+    .card .bio { font-size: 1.1rem; line-height: 1.22; color: #333; min-height: 2.4em; }
+    .card .tags { margin-top: 9px; display: flex; flex-wrap: wrap; gap: 5px; }
+    .card .tags span { font-size: 0.9rem; background: var(--grass); color: #fff; padding: 2px 7px; border: 2px solid #000; }
+    .stamp { position: absolute; top: 22px; font-family: 'Press Start 2P'; font-size: 1.3rem;
+      padding: 7px 11px; border: 5px solid; border-radius: 8px; opacity: 0; }
+    .stamp.like { left: 16px; color: var(--like); border-color: var(--like); transform: rotate(-16deg); }
+    .stamp.nope { right: 16px; color: var(--tnt); border-color: var(--tnt); transform: rotate(16deg); }
+    .empty-deck { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; gap: 14px; padding: 24px; }
+    .empty-deck .big { font-size: 3rem; } .empty-deck p { font-size: 1.25rem; line-height: 1.4; }
+    .actions { display: flex; gap: 22px; align-items: center; }
+    .ab { width: 62px; height: 62px; border: 5px solid #000; box-shadow: 4px 4px 0 #000; cursor: pointer;
+      font-size: 1.5rem; display: flex; align-items: center; justify-content: center; transition: transform .08s; }
     .ab:active { transform: translate(4px,4px); box-shadow: 0 0 0 #000; }
-    .ab.nope { background: #fff; } .ab.like { background: var(--tnt); } .ab.rewind { background: var(--gold); width: 52px; height: 52px; font-size: 1.2rem; }
-    .hint { text-align: center; font-size: 1.05rem; color: #d7ffc4; padding-top: 6px; }
+    .ab.nope { background: #fff; } .ab.like { background: var(--tnt); }
+    .ab.rewind { background: var(--gold); width: 50px; height: 50px; font-size: 1.1rem; }
+    .hint { font-size: 1.05rem; color: #bfe3a3; text-align: center; }
 
-    /* ===== MATCHES ===== */
-    #view-matches { padding: 0; }
-    .mhead { font-family: 'Press Start 2P'; font-size: 0.85rem; padding: 18px 16px 10px; color: var(--gold); }
-    .mlist { flex: 1 1 auto; overflow-y: auto; padding: 0 12px 12px; }
-    .mrow { display: flex; align-items: center; gap: 12px; background: #2a3d18; border: 3px solid #000;
-      padding: 10px 12px; margin-bottom: 10px; cursor: pointer; }
-    .mrow:hover { background: #34491f; }
-    .mrow .av { font-size: 2.2rem; width: 48px; text-align: center; }
-    .mrow .mid { flex: 1 1 auto; min-width: 0; }
-    .mrow .mn { font-family: 'Press Start 2P'; font-size: 0.62rem; }
-    .mrow .lm { font-size: 1.05rem; color: #cfe6b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mrow .ub { background: var(--tnt); color: #fff; border: 2px solid #000; min-width: 26px; height: 26px;
-      display: flex; align-items: center; justify-content: center; font-size: 1rem; padding: 0 5px; }
-    .empty-matches { text-align: center; padding: 50px 24px; color: #cfe6b8; font-size: 1.3rem; line-height: 1.5; }
-
-    /* ===== CHAT ===== */
-    #view-chat { background: #15200c; }
-    .chead { display: flex; align-items: center; gap: 10px; background: var(--grass-d);
-      border-bottom: 4px solid var(--grass-dd); padding: 12px 14px; flex: 0 0 auto; }
+    /* Chat */
+    #pane-chat { background: #0f1c07; }
+    .chead { display: flex; align-items: center; gap: 11px; background: var(--grass-d);
+      border-bottom: 4px solid var(--grass-dd); padding: 12px 16px; flex: 0 0 auto; }
     .chead .back { background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; padding: 0 4px; }
-    .chead .av { font-size: 2rem; } .chead .cn { font-family: 'Press Start 2P'; font-size: 0.7rem; }
-    .chead .cs { font-size: 1rem; color: #d7ffc4; }
-    .clog { flex: 1 1 auto; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-    .bub { max-width: 78%; padding: 8px 12px; font-size: 1.2rem; line-height: 1.3; border: 3px solid #000; word-wrap: break-word; }
+    .chead .av { font-size: 2rem; } .chead .cn { font-family: 'Press Start 2P'; font-size: 0.68rem; }
+    .chead .cs { font-size: 0.98rem; color: #d7ffc4; }
+    .clog { flex: 1 1 auto; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; }
+    .bub { max-width: 70%; padding: 9px 13px; font-size: 1.18rem; line-height: 1.3; border: 3px solid #000; word-wrap: break-word; }
     .bub.them { align-self: flex-start; background: var(--paper); color: #1c1c1c; }
     .bub.me { align-self: flex-end; background: var(--like); color: #06310f; }
-    .typing { align-self: flex-start; background: var(--paper); color: #1c1c1c; padding: 8px 14px; border: 3px solid #000; font-size: 1.2rem; }
-    .cform { display: flex; gap: 8px; padding: 10px; background: #0f1808; border-top: 3px solid #000; flex: 0 0 auto; }
+    .typing { align-self: flex-start; background: var(--paper); color: #1c1c1c; padding: 8px 14px; border: 3px solid #000; font-size: 1.15rem; }
+    .cform { display: flex; gap: 8px; padding: 12px; background: #0a1305; border-top: 3px solid #000; flex: 0 0 auto; }
     .cform input { flex: 1 1 auto; background: #fff; border: 3px solid #000; color: #1c1c1c;
-      font-family: 'VT323'; font-size: 1.2rem; padding: 8px 12px; }
+      font-family: 'VT323'; font-size: 1.2rem; padding: 9px 13px; }
     .cform button { background: var(--like); border: 3px solid #000; color: #06310f; font-family: 'VT323';
-      font-size: 1.2rem; padding: 0 16px; cursor: pointer; }
+      font-size: 1.2rem; padding: 0 18px; cursor: pointer; }
 
-    /* ===== TABBAR ===== */
-    .tabbar { flex: 0 0 auto; display: flex; background: var(--grass-d); border-top: 4px solid var(--grass-dd); }
-    .tab { flex: 1; background: none; border: none; color: #cfe6b8; padding: 12px 0; cursor: pointer;
-      font-family: 'VT323'; font-size: 1.15rem; position: relative; }
-    .tab.on { color: #fff; background: rgba(0,0,0,.18); }
-    .tab .ic { font-size: 1.5rem; display: block; }
-    .tab .badge { position: absolute; top: 6px; right: 28%; background: var(--tnt); color: #fff;
-      border: 2px solid #000; font-size: .8rem; min-width: 20px; height: 20px; display: none;
-      align-items: center; justify-content: center; padding: 0 4px; }
-    .tab .badge.show { display: flex; }
-
-    /* ===== MATCH OVERLAY ===== */
-    .overlay { position: absolute; inset: 0; background: rgba(10,16,6,.94); display: none;
-      flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 28px; z-index: 50; text-align: center; }
+    /* Overlay match */
+    .overlay { position: fixed; inset: 0; background: rgba(8,14,5,.92); display: none;
+      flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 28px; z-index: 80; text-align: center; }
     .overlay.show { display: flex; }
-    .overlay h2 { font-family: 'Press Start 2P'; font-size: 1.5rem; color: var(--gold); text-shadow: 3px 3px 0 #000; }
-    .overlay .duo { font-size: 4rem; }
-    .overlay p { font-size: 1.3rem; line-height: 1.4; }
-    .overlay .ob { font-family: 'VT323'; font-size: 1.25rem; padding: 12px 18px; border: 4px solid #000;
+    .overlay h2 { font-family: 'Press Start 2P'; font-size: 1.7rem; color: var(--gold); text-shadow: 3px 3px 0 #000; }
+    .overlay .duo { font-size: 4.5rem; }
+    .overlay p { font-size: 1.35rem; line-height: 1.4; max-width: 460px; }
+    .overlay .ob { font-family: 'VT323'; font-size: 1.3rem; padding: 13px 20px; border: 4px solid #000;
       box-shadow: 4px 4px 0 #000; cursor: pointer; }
     .overlay .send { background: var(--like); color: #06310f; }
     .overlay .keep { background: #fff; color: #1c1c1c; }
+
+    /* ===== Responsive (petit écran) ===== */
+    @media (max-width: 760px) {
+      body { padding: 0; }
+      .app { flex-direction: column; width: 100vw; height: 100dvh; border: none; }
+      .sidebar { width: 100%; flex: 0 0 auto; max-height: 42%; border-right: none; border-bottom: 5px solid #000; }
+      .stage { flex: 1 1 auto; }
+    }
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="topbar">
-      <div class="logo">Craft<b>Match</b> ⛏️</div>
-      <button class="reset" id="resetBtn" title="Tout réinitialiser">⟲ reset</button>
-    </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sb-head">
+        <div class="logo">Craft<b>Match</b> ⛏️</div>
+        <button class="reset" id="resetBtn" title="Tout réinitialiser">⟲ reset</button>
+      </div>
+      <button class="discover-btn on" id="goDiscover">🔥 Découvrir des profils</button>
+      <div class="sb-mh">MES MATCHS <span id="mCount">(0)</span></div>
+      <div class="mlist" id="mlist"></div>
+    </aside>
 
-    <main>
-      <!-- DISCOVER -->
-      <section class="view active" id="view-discover">
+    <!-- Stage -->
+    <main class="stage">
+      <!-- Deck -->
+      <section class="pane active" id="pane-deck">
         <div class="deck" id="deck"></div>
         <div class="actions">
           <button class="ab rewind" id="btnRewind" title="Annuler">↩️</button>
@@ -164,14 +169,8 @@
         <div class="hint">Glisse la carte à la souris &nbsp;·&nbsp; → like &nbsp; ← passe</div>
       </section>
 
-      <!-- MATCHES -->
-      <section class="view" id="view-matches">
-        <div class="mhead">Mes matchs 💚</div>
-        <div class="mlist" id="mlist"></div>
-      </section>
-
-      <!-- CHAT -->
-      <section class="view" id="view-chat">
+      <!-- Chat -->
+      <section class="pane" id="pane-chat">
         <div class="chead">
           <button class="back" id="chatBack">←</button>
           <span class="av" id="chatAv">🙂</span>
@@ -184,56 +183,51 @@
         </form>
       </section>
     </main>
+  </div>
 
-    <nav class="tabbar">
-      <button class="tab on" id="tabDiscover"><span class="ic">🔥</span>Découvrir</button>
-      <button class="tab" id="tabMatches"><span class="ic">💬</span>Matchs<span class="badge" id="tabBadge">0</span></button>
-    </nav>
-
-    <!-- MATCH overlay -->
-    <div class="overlay" id="overlay">
-      <h2>C'EST UN MATCH&nbsp;!</h2>
-      <div class="duo" id="ovDuo">🦰 💚 🙂</div>
-      <p id="ovTxt">Vous avez tous les deux swipé à droite.</p>
-      <button class="ob send" id="ovSend">Envoyer un message 💬</button>
-      <button class="ob keep" id="ovKeep">Continuer à swiper ⛏️</button>
-    </div>
+  <!-- Match overlay -->
+  <div class="overlay" id="overlay">
+    <h2>C'EST UN MATCH&nbsp;!</h2>
+    <div class="duo" id="ovDuo">🧑‍🚀 💚 🙂</div>
+    <p id="ovTxt">Vous avez tous les deux swipé à droite.</p>
+    <button class="ob send" id="ovSend">Envoyer un message 💬</button>
+    <button class="ob keep" id="ovKeep">Continuer à swiper ⛏️</button>
   </div>
 
   <script>
     const PROFILES = [
       { id:'steve', emoji:'🧑‍🌾', name:'Steve', age:24, dist:'à 3 chunks de toi', bio:"Mineur pro. Cherche quelqu'un pour partager mon stack de diamants.", tags:['Survie','Diamants','Pioche'],
-        replies:["Salut ! Torche ou TNT pour miner ? ⛏️","J'ai bâti une maison en quartz, tu viens la voir ? 🏠","Diamants du jour : 7. Et toi ? 💎","On part à l'aventure ce week-end ?"] },
+        replies:["Salut ! Torche ou TNT pour miner ? ⛏️","J'ai bâti une maison en quartz, tu viens la voir ? 🏠","Diamants du jour : 7. Et toi ? 💎","On part à l'aventure ce week-end ?","J'ai trouvé une grotte géante, ça te dit l'explo ? 🦇","J'ai plein de redstone, on construit un truc ensemble ? 🔴","Tu crafterais quoi en premier sur une île déserte ?","Reste près de moi, il fait nuit… 😏"] },
       { id:'alex', emoji:'👩‍🌾', name:'Alex', age:22, dist:'à 1 chunk de toi', bio:"Team Nether 🔥 Si tu as peur de la lave, passe ton chemin.", tags:['Nether','PvP','Aventure'],
-        replies:["Coucou 🔥 prêt pour le Nether ?","J'ai battu l'Ender Dragon hier 🐉 et toi ?","Arc ou épée ? ⚔️","On se fait un raid ce soir ?"] },
+        replies:["Coucou 🔥 prêt pour le Nether ?","J'ai battu l'Ender Dragon hier 🐉 et toi ?","Arc ou épée ? ⚔️","On se fait un raid ce soir ?","J'ai des potions de Force, on fait équipe ? 💪","La lave c'est juste un jacuzzi un peu chaud 😎","Tu tiens combien de cœurs en PvP ? 😏","On va chercher des têtes de Wither ? 💀"] },
       { id:'creeper', emoji:'🟩', name:'Creeper', age:'?', dist:'juste derrière toi', bio:"Je m'attache vite. Très vite. Trop vite. Ssss…", tags:['Explosif','Câlin','Intense'],
-        replies:["Ssssalut toi… 💚","Je pense déjà à toi, c'est normal ? 💥","Approche, juste un câlin… SSSS","Ne pars pas trop vite 🥺"] },
+        replies:["Ssssalut toi… 💚","Je pense déjà à toi, c'est normal ? 💥","Approche, juste un câlin… SSSS","Ne pars pas trop vite 🥺","Tu m'as regardé, je peux plus me retenir 💚","Reste calme, je vais juste… SSSSS 💣","On forme un duo explosif, non ? 💥","Promis je retiens mon souffle… pour l'instant 😳"] },
       { id:'zombie', emoji:'🧟', name:'Zombie', age:99, dist:'à 12 chunks de toi', bio:"Dispo uniquement la nuit. J'adore les longues balades vers ta porte.", tags:['Nocturne','Romantique','Patient'],
-        replies:["Brrraaah… (salut) 🌙","Je tape à ta porte ce soir ?","J'ai un peu faim… de toi 🧠❤️","La lumière du jour me gêne, on se voit la nuit ?"] },
+        replies:["Brrraaah… (salut) 🌙","Je tape à ta porte ce soir ?","J'ai un peu faim… de toi 🧠❤️","La lumière du jour me gêne, on se voit la nuit ?","Grrr… (tu sens bon) 😋","On se traîne ensemble jusqu'à l'aube ?","Je suis lent mais je finis toujours par t'atteindre 💚","T'as pas un peu de chair frai… euh, un café ? ☕"] },
       { id:'villageois', emoji:'🧑‍🦲', name:'Villageois', age:31, dist:'au village d\'à côté', bio:"Hmmm. Hrrr. (Traduction : 64 émeraudes et un grand cœur.)", tags:['Commerce','Émeraudes','Stable'],
-        replies:["Hmmm 🤔","Hrrr ! (je t'échange 3 émeraudes contre un sourire) 💚","Hmmm hmmm 🟢","Hrrrm ? (tu veux voir mes offres ?)"] },
+        replies:["Hmmm 🤔","Hrrr ! (je t'échange 3 émeraudes contre un sourire) 💚","Hmmm hmmm 🟢","Hrrrm ? (tu veux voir mes offres ?)","Hmph ! (j'ai baissé mes prix rien que pour toi) 💚","Hrr hrr… (mon clocher sonne quand je te vois)","Hmmmmm 🥕 (tu acceptes le troc de cœurs ?)","Hrrr ! (mes meilleures émeraudes sont à toi)"] },
       { id:'loup', emoji:'🐺', name:'Loup', age:4, dist:'à 2 chunks de toi', bio:"Fidèle, joueur, je te suis partout. Un os et je suis à toi pour la vie.", tags:['Loyal','Joueur','Bon chien'],
-        replies:["Wouf ! 🦴","Tu m'as donné un os, je t'aime déjà 💚","On joue à rapporter le bâton ? 🪵","Je te suis partout, même dans le Nether 🐺"] },
+        replies:["Wouf ! 🦴","Tu m'as donné un os, je t'aime déjà 💚","On joue à rapporter le bâton ? 🪵","Je te suis partout, même dans le Nether 🐺","Grrr (je ne protège que toi) 🛡️","*remue la queue* 🐺💚","Une balade en meute ce soir ? 🌕","Gratte-moi le ventre et je suis à toi ✨"] },
       { id:'enderman', emoji:'🌑', name:'Enderman', age:'∞', dist:'partout et nulle part', bio:"Ne me regarde pas dans les yeux. Sauf si c'est pour un date.", tags:['Mystérieux','Téléport','Grand'],
-        replies:["…","*se téléporte juste à côté de toi* 🌌","Ne fixe pas mes yeux 👀","J'ai déplacé un bloc en pensant à toi 🟪"] },
+        replies:["…","*se téléporte juste à côté de toi* 🌌","Ne fixe pas mes yeux 👀","J'ai déplacé un bloc en pensant à toi 🟪","L'eau me terrifie, mais toi non 💜","*disparaît puis réapparaît plus près*","Je collectionne des blocs… et peut-être ton cœur 🟪","Vwoop. (c'était un bisou téléporté) 💜"] },
       { id:'squelette', emoji:'💀', name:'Squelette', age:200, dist:'à 8 chunks de toi', bio:"Archer de précision. Je vise droit au cœur. 🏹", tags:['Archer','Précis','Romantique'],
-        replies:["J'ai visé ton cœur 🏹❤️","Klklkl (je ris) 💀","Une balade au clair de lune ? 🌙","Je rate jamais ma cible 😏"] },
+        replies:["J'ai visé ton cœur 🏹❤️","Klklkl (je ris) 💀","Une balade au clair de lune ? 🌙","Je rate jamais ma cible 😏","J'ai gardé une flèche spéciale pour toi 🏹","Klkl… tu me donnes des frissons (j'en ai pourtant pas) 💀","On danse ? Je connais des pas de squelette 🦴","Reste à l'ombre avec moi, le soleil me grille 🔥"] },
       { id:'cochon', emoji:'🐷', name:'Cochon', age:3, dist:'dans l\'enclos voisin', bio:"Selle-moi et partons à l'aventure avec une carotte au bout du bâton.", tags:['Mignon','Aventure','Gourmand'],
-        replies:["Groin groin 🥕","Tu as une carotte ? 😍","On part en balade sellé ? 🐷","J'évite la foudre… ça me transforme 😬"] },
-      { id:'blaze', emoji:'🔥', name:'Blaze', age:'?', dist:'dans la forteresse', bio:"Ambiance chaude garantie. J'ai un caractère explosif mais le cœur tendre.", tags:['Nether','Chaud','Intense'],
-        replies:["Ça chauffe entre nous 🔥","J'ai des bâtons de blaze rien que pour toi","Reste à distance… ou pas 😏🔥","Je flotte vers toi ✨"] },
+        replies:["Groin groin 🥕","Tu as une carotte ? 😍","On part en balade sellé ? 🐷","J'évite la foudre… ça me transforme 😬","Roule-toi dans la boue avec moi ? 💕","Groiiin ! (tu es plus mignon qu'une betterave)","Je te suivrais au bout du monde pour une pomme 🍎","On se fait un câlin tout doux ? 🐽"] },
+      { id:'blaze', emoji:'🔥', name:'Blaze', age:'?', dist:'dans la forteresse', bio:"Ambiance chaude garantie. Caractère explosif mais cœur tendre.", tags:['Nether','Chaud','Intense'],
+        replies:["Ça chauffe entre nous 🔥","J'ai des bâtons de blaze rien que pour toi","Reste à distance… ou pas 😏🔥","Je flotte vers toi ✨","Mon cœur fait des boules de feu 🔥❤️","Tu me fais fondre, et c'est dur pour un être de flammes 🥵","On illumine la forteresse ensemble ?","Approche, je ne mords pas… je brûle un peu 😈"] },
       { id:'sorciere', emoji:'🧙‍♀️', name:'Sorcière', age:66, dist:'dans la cabane du marais', bio:"Je prépare des potions… d'amour ? Goûte et on verra. 🧪", tags:['Potions','Mystère','Soins'],
-        replies:["J'ai une potion de Force pour notre date 💪","Tu veux un philtre d'amour ? 🧪💕","Hihi 🧙‍♀️","Je te soigne si tu tombes pour moi ❤️"] },
-      { id:'golem', emoji:'🗿', name:'Golem de fer', age:50, dist:'protège le village', bio:"Grand, costaud, protecteur. J'offre des coquelicots aux gens que j'aime. 🌹", tags:['Protecteur','Fort','Doux'],
-        replies:["*te tend un coquelicot* 🌹","Je te protégerai de tous les mobs 🛡️","…💚 (je suis timide)","Personne ne te fera de mal."] },
+        replies:["J'ai une potion de Force pour notre date 💪","Tu veux un philtre d'amour ? 🧪💕","Hihi 🧙‍♀️","Je te soigne si tu tombes pour moi ❤️","Une potion de Lévitation pour planer à deux ? ✨","Attention, je lance des effets… surtout sur les cœurs 💜","Mon chaudron mijote quelque chose pour toi 🧪","Bois ça… non je rigole. Quoique 😜"] },
+      { id:'golem', emoji:'🗿', name:'Golem de fer', age:50, dist:'protège le village', bio:"Grand, costaud, protecteur. J'offre des coquelicots à ceux que j'aime. 🌹", tags:['Protecteur','Fort','Doux'],
+        replies:["*te tend un coquelicot* 🌹","Je te protégerai de tous les mobs 🛡️","…💚 (je suis timide)","Personne ne te fera de mal.","*hoche lentement la tête* (ça veut dire oui) 🗿","Mes bras sont grands, parfaits pour les câlins 🤗","Je veille sur toi, même la nuit 🌙","Un Creeper ? Je m'en occupe. Reste derrière moi 💪"] },
       { id:'slime', emoji:'🟢', name:'Slime', age:'?', dist:'dans la grotte humide', bio:"Collant mais attachant. Plus on me coupe, plus il y a d'amour. 💚", tags:['Collant','Rebondi','Joyeux'],
-        replies:["Boing boing 💚","Je rebondis de joie quand tu parles !","Plus on est petit, plus on est mignon 🟢","On fait un câlin gluant ?"] },
+        replies:["Boing boing 💚","Je rebondis de joie quand tu parles !","Plus on est petit, plus on est mignon 🟢","On fait un câlin gluant ?","Je colle un peu… beaucoup… passionnément 💚","*splotch* (ça veut dire je t'aime) 🟢","On rebondit ensemble jusqu'à la lune ? 🌙","Touche-moi, c'est tout doux et un peu gluant 😄"] },
       { id:'piglin', emoji:'🐽', name:'Piglin', age:27, dist:'au bastion', bio:"J'adore l'or. Apporte un lingot et tu auras toute mon attention. ✨", tags:['Nether','Or','Troc'],
-        replies:["T'as de l'or ? 👀✨","Je troque mon cœur contre un lingot 💛","Ne porte rien en or des autres, je suis jaloux 😤","Groink ! (tu me plais)"] }
+        replies:["T'as de l'or ? 👀✨","Je troque mon cœur contre un lingot 💛","Ne porte rien en or des autres, je suis jaloux 😤","Groink ! (tu me plais)","Un lingot et je danse rien que pour toi 💃","Mon bastion ou le tien ce soir ? 🏰","Brille un peu plus et je suis à toi ✨","Je t'offre ma plus belle pépite 💛"] }
     ];
 
     const ALWAYS_MATCH = new Set(['creeper','loup','zombie','villageois','slime','golem']);
-    const KEY = 'craftmatch_v2';
+    const KEY = 'craftmatch_v3';
     const $ = (id) => document.getElementById(id);
 
     function blank(){ return { swiped:[], matches:[], convos:{}, unread:{}, lastSwipe:null }; }
@@ -244,43 +238,36 @@
     const byId = (id) => PROFILES.find(p => p.id === id);
     const deck = () => PROFILES.filter(p => !state.swiped.includes(p.id));
     const rand = (arr) => arr[Math.floor(Math.random()*arr.length)];
-    // Choisit une réplique différente de la dernière envoyée par le personnage
     function pickReply(p, convo){
       const lastThem = (convo || []).slice().reverse().find(m => m.from === 'them');
       const pool = p.replies.filter(r => !lastThem || r !== lastThem.text);
       return rand(pool.length ? pool : p.replies);
     }
 
-    /* ---------- Navigation ---------- */
-    function showView(name){
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      $('view-'+name).classList.add('active');
-      $('tabDiscover').classList.toggle('on', name==='discover');
-      $('tabMatches').classList.toggle('on', name==='matches' || name==='chat');
+    /* ---------- Panneaux ---------- */
+    let currentChat = null;
+    function showPane(name){
+      document.querySelectorAll('.pane').forEach(v => v.classList.remove('active'));
+      $('pane-'+name).classList.add('active');
+      $('goDiscover').classList.toggle('on', name==='deck');
     }
-    $('tabDiscover').onclick = () => showView('discover');
-    $('tabMatches').onclick = () => { renderMatches(); showView('matches'); };
+    $('goDiscover').onclick = () => { currentChat=null; markActiveRow(); showPane('deck'); };
 
     /* ---------- Deck / swipe ---------- */
     function renderDeck(){
-      const d = deck();
-      const el = $('deck');
-      el.innerHTML = '';
+      const d = deck(); const el = $('deck'); el.innerHTML = '';
       if (d.length === 0){
-        const e = document.createElement('div');
-        e.className = 'empty-deck';
+        const e = document.createElement('div'); e.className='empty-deck';
         e.innerHTML = '<div class="big">🪓</div><p>Plus de profils pour le moment&nbsp;!<br>Tu as tout swipé.</p>';
-        el.appendChild(e);
-        return;
+        el.appendChild(e); return;
       }
-      // afficher jusqu'à 2 cartes (profondeur), la 1re = interactive
       d.slice(0, 2).reverse().forEach((p, idx, arr) => {
         const isTop = idx === arr.length - 1;
         const c = document.createElement('div');
         c.className = 'card' + (isTop ? ' top' : '');
-        c.setAttribute('draggable', 'false');
+        c.setAttribute('draggable','false');
         c.style.zIndex = idx + 1;
-        if (!isTop){ c.style.transform = 'scale(0.96) translateY(8px)'; }
+        if (!isTop) c.style.transform = 'scale(0.96) translateY(8px)';
         c.innerHTML =
           '<div class="stamp like">LIKE</div><div class="stamp nope">NOPE</div>' +
           '<div class="pic"><span class="skin">'+p.emoji+'</span></div>' +
@@ -293,43 +280,44 @@
     }
 
     function attachDrag(card, profile){
-      let sx=0, sy=0, dx=0, dy=0, dragging=false;
       const like = card.querySelector('.stamp.like');
       const nope = card.querySelector('.stamp.nope');
-      const down = (e) => {
-        dragging=true; sx=e.clientX; sy=e.clientY;
-        card.style.transition='none'; card.style.cursor='grabbing';
-        try { card.setPointerCapture(e.pointerId); } catch(_){}
-        e.preventDefault();
-      };
-      const move = (e) => {
+      let sx=0, sy=0, dx=0, dy=0, dragging=false;
+      function move(e){
         if(!dragging) return;
         dx=e.clientX-sx; dy=e.clientY-sy;
         card.style.transform = 'translate('+dx+'px,'+dy+'px) rotate('+(dx/22)+'deg)';
         like.style.opacity = Math.max(0, Math.min(1, dx/110));
         nope.style.opacity = Math.max(0, Math.min(1, -dx/110));
-      };
-      const up = () => {
+      }
+      function end(){
         if(!dragging) return; dragging=false;
-        card.style.cursor='grab';
-        card.style.transition='transform .35s ease';
+        // les écouteurs sont sur window => le relâchement est toujours capté (carte jamais bloquée)
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', end);
+        window.removeEventListener('pointercancel', end);
+        card.style.cursor='grab'; card.style.transition='transform .35s ease';
         if (dx > 110){ flyOut(card, 1); decide(profile.id, true); }
         else if (dx < -110){ flyOut(card, -1); decide(profile.id, false); }
         else { card.style.transform=''; like.style.opacity=0; nope.style.opacity=0; }
-      };
-      card.addEventListener('pointerdown', down);
-      card.addEventListener('pointermove', move);
-      card.addEventListener('pointerup', up);
-      card.addEventListener('pointercancel', up);
+      }
+      card.addEventListener('pointerdown', (e) => {
+        if (dragging) return;
+        dragging=true; sx=e.clientX; sy=e.clientY;
+        card.style.transition='none'; card.style.cursor='grabbing';
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', end);
+        window.addEventListener('pointercancel', end);
+        e.preventDefault();
+      });
     }
     function flyOut(card, dir){
       card.style.transition='transform .35s ease';
-      card.style.transform = 'translate('+(dir*600)+'px,60px) rotate('+(dir*30)+'deg)';
+      card.style.transform = 'translate('+(dir*700)+'px,40px) rotate('+(dir*30)+'deg)';
     }
 
     function decide(id, liked){
-      state.swiped.push(id);
-      state.lastSwipe = id;
+      state.swiped.push(id); state.lastSwipe = id;
       if (liked && (ALWAYS_MATCH.has(id) || Math.random() < 0.55)){
         if (!state.matches.includes(id)){
           state.matches.push(id);
@@ -339,15 +327,13 @@
           showMatch(p);
         }
       }
-      save();
-      updateBadge();
+      save(); renderMatches(); updateCounts();
       setTimeout(renderDeck, 360);
     }
 
-    // Boutons
     function programmatic(liked){
       const d = deck(); if (!d.length) return;
-      const top = $('deck').querySelector('.card.top');   // la carte VISIBLE du dessus
+      const top = $('deck').querySelector('.card.top');
       const p = d[0];
       if (top){ top.style.transition='transform .35s ease'; flyOut(top, liked?1:-1); }
       decide(p.id, liked);
@@ -356,29 +342,25 @@
     $('btnNope').onclick = () => programmatic(false);
     $('btnRewind').onclick = () => {
       if (!state.lastSwipe) return;
-      const id = state.lastSwipe;
-      state.swiped = state.swiped.filter(x => x !== id);
-      // si c'était un match créé à l'instant, on le retire aussi
-      state.lastSwipe = null;
-      save(); updateBadge(); renderDeck();
+      state.swiped = state.swiped.filter(x => x !== state.lastSwipe);
+      state.lastSwipe = null; save(); renderDeck();
     };
 
-    /* ---------- Match overlay ---------- */
+    /* ---------- Overlay match ---------- */
     let pendingChat = null;
     function showMatch(p){
       $('ovDuo').textContent = '🧑‍🚀 💚 ' + p.emoji;
       $('ovTxt').textContent = 'Toi et ' + p.name + ' avez tous les deux swipé à droite !';
-      pendingChat = p.id;
-      $('overlay').classList.add('show');
+      pendingChat = p.id; $('overlay').classList.add('show');
     }
     $('ovKeep').onclick = () => $('overlay').classList.remove('show');
     $('ovSend').onclick = () => { $('overlay').classList.remove('show'); if(pendingChat) openChat(pendingChat); };
 
-    /* ---------- Matches list ---------- */
+    /* ---------- Liste des matchs (sidebar) ---------- */
     function renderMatches(){
       const list = $('mlist'); list.innerHTML = '';
       if (!state.matches.length){
-        list.innerHTML = '<div class="empty-matches">Aucun match pour l\'instant.<br>Va swiper des profils ! 🔥</div>';
+        list.innerHTML = '<div class="empty-matches">Aucun match.<br>Swipe des profils à droite ! 🔥</div>';
         return;
       }
       state.matches.slice().reverse().forEach(id => {
@@ -387,84 +369,76 @@
         const lastTxt = last ? (last.from==='me'?'Toi : ':'') + last.text : 'Dis bonjour 👋';
         const un = state.unread[id] || 0;
         const row = document.createElement('div');
-        row.className = 'mrow';
+        row.className = 'mrow' + (id===currentChat ? ' active' : '');
+        row.dataset.id = id;
         row.innerHTML = '<div class="av">'+p.emoji+'</div><div class="mid"><div class="mn">'+p.name+'</div>' +
           '<div class="lm">'+lastTxt+'</div></div>' + (un? '<div class="ub">'+un+'</div>' : '');
         row.onclick = () => openChat(id);
         list.appendChild(row);
       });
     }
+    function markActiveRow(){
+      document.querySelectorAll('.mrow').forEach(r => r.classList.toggle('active', r.dataset.id===currentChat));
+    }
 
     /* ---------- Chat ---------- */
-    let currentChat = null;
     function openChat(id){
-      currentChat = id;
-      state.unread[id] = 0; save(); updateBadge();
+      currentChat = id; state.unread[id] = 0; save();
       const p = byId(id);
-      $('chatAv').textContent = p.emoji;
-      $('chatName').textContent = p.name;
-      renderChat();
-      showView('chat');
+      $('chatAv').textContent = p.emoji; $('chatName').textContent = p.name;
+      renderChat(); renderMatches(); updateCounts(); showPane('chat');
     }
-    $('chatBack').onclick = () => { currentChat=null; renderMatches(); showView('matches'); };
+    $('chatBack').onclick = () => { currentChat=null; markActiveRow(); showPane('deck'); };
 
     function renderChat(){
       const log = $('clog'); log.innerHTML='';
       (state.convos[currentChat]||[]).forEach(m => {
         const b = document.createElement('div');
         b.className = 'bub ' + (m.from==='me'?'me':'them');
-        b.textContent = m.text;
-        log.appendChild(b);
+        b.textContent = m.text; log.appendChild(b);
       });
       log.scrollTop = log.scrollHeight;
     }
-
     $('cform').addEventListener('submit', (e) => {
       e.preventDefault();
       const inp = $('cinput'); const txt = inp.value.trim();
       if (!txt || !currentChat) return;
       const id = currentChat;
       state.convos[id].push({ from:'me', text: txt });
-      inp.value=''; save(); renderChat();
-      botReply(id);
+      inp.value=''; save(); renderChat(); botReply(id);
     });
 
     function botReply(id){
       const p = byId(id);
-      // indicateur "écrit…"
       if (currentChat === id){
         const log = $('clog');
         const t = document.createElement('div'); t.className='typing'; t.id='typing'; t.textContent = p.name + ' écrit…';
         log.appendChild(t); log.scrollTop = log.scrollHeight;
       }
-      const delay = 800 + Math.random()*1400;
       setTimeout(() => {
         const typing = $('typing'); if (typing) typing.remove();
         state.convos[id].push({ from:'them', text: pickReply(p, state.convos[id]) });
-        if (currentChat !== id){ state.unread[id] = (state.unread[id]||0)+1; }
+        if (currentChat !== id) state.unread[id] = (state.unread[id]||0)+1;
         save();
         if (currentChat === id) renderChat();
-        updateBadge();
-        if (document.getElementById('view-matches').classList.contains('active')) renderMatches();
-      }, delay);
+        renderMatches(); updateCounts();
+      }, 800 + Math.random()*1400);
     }
 
-    /* ---------- Badges + reset ---------- */
-    function updateBadge(){
-      const total = Object.values(state.unread).reduce((a,b)=>a+(b||0),0);
-      const b = $('tabBadge');
-      b.textContent = total; b.classList.toggle('show', total>0);
+    /* ---------- Compteurs + reset ---------- */
+    function updateCounts(){
+      const un = Object.values(state.unread).reduce((a,b)=>a+(b||0),0);
+      $('mCount').textContent = '(' + state.matches.length + (un? ' · '+un+' non lus' : '') + ')';
     }
     $('resetBtn').onclick = () => {
       if (confirm('Effacer tous tes swipes, matchs et conversations ?')){
-        state = blank(); save(); currentChat=null;
-        renderDeck(); renderMatches(); updateBadge(); showView('discover');
+        state = blank(); currentChat=null; save();
+        renderDeck(); renderMatches(); updateCounts(); showPane('deck');
       }
     };
 
     /* ---------- Init ---------- */
-    renderDeck();
-    updateBadge();
+    renderDeck(); renderMatches(); updateCounts();
   </script>
 </body>
 </html>
