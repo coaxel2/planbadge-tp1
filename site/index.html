@@ -10,6 +10,7 @@
   <meta property="og:description" content="Je conçois, pilote et déploie des projets web — de l'idée à la production." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://axel.planbadge.fr" />
+  <meta property="og:image" content="https://axel.planbadge.fr/avatar.jpg" />
   <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -61,8 +62,8 @@
     header{padding:96px 0 80px;text-align:center}
     .avatar{width:96px;height:96px;border-radius:50%;margin:0 auto 26px;position:relative;display:flex;align-items:center;justify-content:center}
     .avatar .ring{position:absolute;inset:-3px;border-radius:50%;background:var(--grad);filter:blur(2px);opacity:.9;animation:spin 8s linear infinite}
-    .avatar .face{position:relative;width:100%;height:100%;border-radius:50%;background:#11111d;display:flex;align-items:center;justify-content:center;
-      font-family:'Space Grotesk';font-weight:700;font-size:2rem;border:3px solid var(--bg)}
+    .avatar .face{position:relative;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 30%;
+      border:3px solid var(--bg);background:#11111d;display:block}
     @keyframes spin{to{transform:rotate(360deg)}}
     .status{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);background:var(--panel);
       border:1px solid var(--border);padding:7px 15px;border-radius:999px;margin-bottom:24px}
@@ -154,7 +155,7 @@
 
   <header id="top">
     <div class="wrap">
-      <div class="avatar reveal"><span class="ring"></span><span class="face">AC</span></div>
+      <div class="avatar reveal"><span class="ring"></span><img class="face" src="avatar.jpg" alt="Photo d'Axel Courty" /></div>
       <div class="status reveal"><span class="dot"></span>Disponible pour de nouveaux projets</div>
       <h1 class="reveal">Axel <span class="g">Courty</span></h1>
       <p class="role reveal">Chef de projet digital</p>
