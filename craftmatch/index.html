@@ -52,8 +52,10 @@
       position: absolute; inset: 0; background: var(--paper); color: var(--ink);
       border: 5px solid #000; box-shadow: 6px 6px 0 #000;
       display: flex; flex-direction: column; overflow: hidden; will-change: transform;
-      touch-action: none; user-select: none;
+      touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;
+      cursor: grab;
     }
+    .card * { pointer-events: none; }
     .card .pic {
       flex: 1 1 auto; display: flex; align-items: center; justify-content: center; position: relative;
       background: repeating-linear-gradient(45deg, #9bd76e 0 26px, #8ccb5e 26px 52px);
@@ -275,7 +277,8 @@
       d.slice(0, 2).reverse().forEach((p, idx, arr) => {
         const isTop = idx === arr.length - 1;
         const c = document.createElement('div');
-        c.className = 'card';
+        c.className = 'card' + (isTop ? ' top' : '');
+        c.setAttribute('draggable', 'false');
         c.style.zIndex = idx + 1;
         if (!isTop){ c.style.transform = 'scale(0.96) translateY(8px)'; }
         c.innerHTML =
@@ -293,7 +296,12 @@
       let sx=0, sy=0, dx=0, dy=0, dragging=false;
       const like = card.querySelector('.stamp.like');
       const nope = card.querySelector('.stamp.nope');
-      const down = (e) => { dragging=true; sx=e.clientX; sy=e.clientY; card.style.transition='none'; card.setPointerCapture(e.pointerId); };
+      const down = (e) => {
+        dragging=true; sx=e.clientX; sy=e.clientY;
+        card.style.transition='none'; card.style.cursor='grabbing';
+        try { card.setPointerCapture(e.pointerId); } catch(_){}
+        e.preventDefault();
+      };
       const move = (e) => {
         if(!dragging) return;
         dx=e.clientX-sx; dy=e.clientY-sy;
@@ -303,7 +311,8 @@
       };
       const up = () => {
         if(!dragging) return; dragging=false;
-        card.style.transition='transform .3s ease';
+        card.style.cursor='grab';
+        card.style.transition='transform .35s ease';
         if (dx > 110){ flyOut(card, 1); decide(profile.id, true); }
         else if (dx < -110){ flyOut(card, -1); decide(profile.id, false); }
         else { card.style.transform=''; like.style.opacity=0; nope.style.opacity=0; }
@@ -332,15 +341,15 @@
       }
       save();
       updateBadge();
-      setTimeout(renderDeck, 320);
+      setTimeout(renderDeck, 360);
     }
 
     // Boutons
     function programmatic(liked){
-      const top = $('deck').querySelector('.card');
       const d = deck(); if (!d.length) return;
+      const top = $('deck').querySelector('.card.top');   // la carte VISIBLE du dessus
       const p = d[0];
-      if (top){ flyOut(top, liked?1:-1); }
+      if (top){ top.style.transition='transform .35s ease'; flyOut(top, liked?1:-1); }
       decide(p.id, liked);
     }
     $('btnLike').onclick = () => programmatic(true);
